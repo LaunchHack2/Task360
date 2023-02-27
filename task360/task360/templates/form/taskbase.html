@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% block task_header %}
+{% endblock %}
+{% endblock %}
+
+{% block body %}
+<header>
+    <nav class="nav-container">
+      <span> Home </span>
+      <ul class='nav-list'>
+        {% block nav_action %}
+        {% endblock %}
+      </ul>
+    </nav>
+  </header>
+
+<div class="wrapper">
+
+
+    <div class="messages">
+        {% if messages %}
+        {% for msg in messages %} 
+        <strong>{{ msg }}</strong>
+        <button type="button" class="close">&times;</button>
+        {% endfor %} 
+        {% endif %}
+    
+    </div>
+
+
+
+    <form class="card-flex-box" method="post">
+        {% csrf_token %}
+
+      <div class="card">
+
+        <div class="static-title">
+            <span>Post Link</span>
+        </div>
+  
+        <div class="card-header">
+            {% block card_header %}
+            {% endblock %}
+            <span></span>
+        </div>
+  
+        <div class="card-input">
+            {% block card_input %}
+            {% endblock %}
+        </div>
+        
+        <div class="card-textarea">
+            {% block card_textarea %}
+            {% endblock %}
+        </div>
+  
+        <div class="card-action">
+            <button class="save"> Save </button>
+            <button class="discard">Discard</button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+    {% block task_script %}
+    {% endblock %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'index.html' %}
+
+{% block head %}
+    <title>Login</title>
+{% endblock %}
+
+{% block header %}
+    <span class="header">Login</span>
+{% endblock %}
+
+{% block email %}
+    {{ form.email.errors }}
+    {{ form.email }}
+{% endblock %}
+
+{% block password %}
+    {{ form.password.errors }}
+    {{ form.password }}
+{% endblock %}
+
+{% block action %}
+    <button type="submit">Login</button>
+    <a href="{% url 'taskapp-register' %} "> Need An Account </a>
+    <a href="{% url 'taskapp-forgotpassword' %}"> Forgot Password </a>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'taskbase.html' %}
+
+{% block task_header %}
+{% load static %}
+{% endblock %}
+
+{% block nav_action %}
+    <li><a href='{% url "taskapp-logout" %}'> Logout </a></li>
+{% endblock %}
+
+{% block card_header %}
+    {{ form.title.errors }}
+    {{ form.title }}
+{% endblock %}
+
+{% block card_input %} 
+    {{ form.link.errors }}
+    {{ form.link }}
+{% endblock %} 
+
+{% block card_textarea %} 
+    {{ form.comment.errors }}
+    {{ form.comment }}
+{% endblock %}
+
+
+{% block task_script %}
+<script src="{% static 'js/task.js' %}"></script>
+{% endblock %}

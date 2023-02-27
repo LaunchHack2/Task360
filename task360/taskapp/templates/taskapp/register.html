@@ -1,0 +1,26 @@
+{% extends 'index.html' %}
+
+<!-- Just some basic register html page -->
+
+{% block head %}
+    <title>Register</title>
+{% endblock %}
+
+{% block header %}
+    <span class="header">Register</span>
+{% endblock %}
+
+{% block email %}
+ {{ form.email.errors }}
+ {{ form.email }}
+{% endblock %}
+
+{% block password %}
+ {{ form.password.errors }}
+ {{ form.password }}
+{% endblock %}
+
+{% block action %}
+    <button type="submit">Register</button>
+    <a href="{% url 'taskapp-login' %}">Already have an Account?</a>
+{% endblock action %}

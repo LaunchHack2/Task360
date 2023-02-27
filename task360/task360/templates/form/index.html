@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% block index_head %} {% endblock %}
+{% endblock %}
+
+{% block body %}
+<body>
+    <div class="register-box">
+
+    
+      <div class="messages">
+        {% if messages %}
+        {% for msg in messages %} 
+        <strong>{{ msg }}</strong>
+        <button type="button" class="close">&times;</button>
+        {% endfor %} 
+        {% endif %}
+
+      </div>
+
+      
+    <div class="register-container">
+        <div class="header">
+        {% block header %}
+        {% endblock %}
+        </div>
+
+      <form class="register-form" method="POST"> 
+        {% csrf_token %}
+
+        <div class='container'>
+        {% block username %}
+        {% endblock %}
+        </div>
+
+        <div class='container email-container'>
+        {% block email %}
+        {% endblock %}
+        </div>
+
+        <div class='container'>
+        {% block password %}
+        {% endblock %}
+        </div>
+
+        {% block action %}
+        {% endblock %}
+
+      </form>
+    </div>
+    </div>
+  </body>
+{% endblock %}
