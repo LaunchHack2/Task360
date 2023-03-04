@@ -104,3 +104,7 @@ class AuthenticateUser(BaseBackend):
                         return func(request)
             return inner_wrap
         return wrapfunc
+
+    
+    def has_perm(self): 
+        pass

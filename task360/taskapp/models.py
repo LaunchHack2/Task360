@@ -11,15 +11,13 @@ class RegisterModel(models.Model):
     password = models.CharField(max_length=200)
 
 
+
 class PostModel(models.Model):
     '''
     - Stores New Task
+    - Relationship with RegisterModel 
+    - Allows you to know what user created what post
     '''
-    pass
+    task = models.CharField(max_length=100, default="Some Task")
+    user = models.ForeignKey(RegisterModel, on_delete=models.CASCADE, related_name='user', default="Some User")
 
-
-class TempKeyModel(models.Model):
-    '''
-    - TempKey Model stores temporary tokens for forgotten passwords
-    ''' 
-    pass

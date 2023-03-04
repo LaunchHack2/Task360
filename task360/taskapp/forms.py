@@ -14,19 +14,18 @@ from taskapp.models import RegisterModel
 # My Forms
 class RegisterForm(forms.ModelForm):
     '''
-    - Creates a Register Form 
+    - Creates a Register Form
     '''
     email = forms.CharField(widget=forms.EmailInput(
         attrs={'placeholder': 'Email'}), required=True, validators=[validate_email])
     password = forms.CharField(widget=forms.PasswordInput(
         attrs={'placeholder': 'Password'}), required=True, validators=[validate_slug])
-    
-    class Meta: 
+
+    class Meta:
         model = RegisterModel
         fields = '__all__'
-    
 
-    def clean_password(self): 
+    def clean_password(self):
         data = self.cleaned_data['password']
 
         hashpw = make_password(data, salt=secrets.token_hex(32))
@@ -56,17 +55,27 @@ class ForgotPasswordForm(forms.Form):
 
         try:
             check_email = RegisterModel.objects.get(pk=data)
-            return True
+            return data
 
         except RegisterModel.DoesNotExist:
             raise ValidationError('Email Does Not Exist')
 
 
+class SetPasswordForm(forms.Form):
+    '''
+    - Set new password
+    '''
+
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': "Password"}), required=True, validators=[validate_slug])
+    confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': "Confirm Password"}), required=True, validators=[validate_slug])
+
+
+
 class PostForm(forms.ModelForm):
     '''
-    PostForm Object(forms.ModelForm) allows to: 
+    PostForm Object(forms.ModelForm) allows to:
     - Create task
     - Update task
-    - Delete task 
+    - Delete task
     '''
     pass
