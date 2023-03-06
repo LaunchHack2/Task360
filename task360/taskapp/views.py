@@ -1,6 +1,7 @@
 import secrets
 import json
 import re
+import datetime
 
 from itertools import islice
 
@@ -97,8 +98,8 @@ def forgotpassword(request):
         if form.is_valid():
             token = secrets.token_urlsafe(32)           
 
-            resp.set_cookie('email', form.cleaned_data['email'])
-            resp.set_cookie('token', token)
+            resp.set_cookie('email', form.cleaned_data['email'], max_age=datetime.timedelta(minutes=5), samesite="Strict")
+            resp.set_cookie('token', token, max_age=datetime.timedelta(minutes=5), samesite="Strict")
 
             url = request.build_absolute_uri(f"{reverse('taskapp-setpassword')}?email={form.cleaned_data['email']}&temp_token={token}")
 
