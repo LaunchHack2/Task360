@@ -10,18 +10,19 @@ from django.urls import reverse
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 
 from authenticate.backend import AuthenticateUser
 
-from taskapp.models import RegisterModel, PostModel
+from taskapp.models import UserModel, TaskModel
 from taskapp import forms
 
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
+#from rest_framework.response import Response
+#from rest_framework.decorators import api_view
 
 
 # Create your views here.
-auth = AuthenticateUser(RegisterModel)
+auth = AuthenticateUser(UserModel)
 
 
 @auth.is_authenticated(redirect_true='taskapp-account')
@@ -63,9 +64,10 @@ def login(request):
 
             if auth.login(request, email, password):
                 messages.success(request, 'Successfully Logged In')
-                return redirect(reverse('taskapp-login'))
+                return redirect(reverse('taskapp-account'))
 
-            messages.error(request, 'Invalid Credentials')
+        messages.error(request, 'Invalid Credentials')
+        return redirect('taskapp-login')
 
     
     return resp 
@@ -140,7 +142,7 @@ def setpassword(request):
 
             if check_password: 
                 p = make_password(form.cleaned_data['password'], salt=secrets.token_hex())
-                usr = RegisterModel.objects.get(pk=request.COOKIES['email'])
+                usr = UserModel.objects.get(pk=request.COOKIES['email'])
                 usr.password = p
                 usr.save()
 
@@ -154,24 +156,59 @@ def setpassword(request):
 def account(request):
     '''
     - Account Page
-    - Task will be created on this page
-    - Store task
+    - Read Task for specifc user
     '''
 
-    return render(request, 'taskapp/account.html')
+    tasks = TaskModel.objects.filter(user=auth.current_user)
+
+    return render(request, 'taskapp/account.html', context={'tasks': tasks})
 
 
+@auth.is_authenticated(redirect_false='taskapp-login')
+def create_task(request):
+    '''
+    - Creates Task
+    '''
+    form = forms.TaskForm()
 
-# Using cookies to store task
+    if request.method == "POST":
+        form = forms.TaskForm(request.POST)
 
-#    batch_size = 100
-#
-#    objs = map(lambda t: PostModel(task=t, user=current_user), content)
-#
-#    while True:
-#        batch = list(islice(objs, batch_size))
-#        if not batch:
-#            break
-#        PostModel.objects.bulk_create(batch, batch_size, ignore_conflicts=True)
-#
+        if form.is_valid():
+            form.user = auth.current_user
+            form.save()
+            return redirect(reverse('taskapp-account'))
+
+    return render(request, 'taskapp/create_task.html', context={'form': form})
+
+
+@auth.is_authenticated(redirect_false='taskapp-login')
+def delete_task(request, id): 
+    '''
+    - Delete Task
+    '''
+    delete_task = TaskModel.objects.get(pk=id).delete()
+
+    return redirect('taskapp-account')
+
+
+@auth.is_authenticated(redirect_false='taskapp-login')
+def edit_task(request, id): 
+    # Possiblity: @api_view['GET']
+    # Might make this an api_view function
+    '''
+    - Edit Task through query parameters
+    '''
+    task_instance = get_object_or_404(TaskModel, pk=id)
+
+    if request.method == "GET": 
+        t = request.GET.get('title')
+        desc = request.GET.get('desc', '')
+
+        task_instance.title = t
+        task_instance.desc = desc
+
+        task_instance.save()
     
+
+    return redirect('taskapp-account')

@@ -19,6 +19,7 @@ class AuthenticateUser(BaseBackend):
 
     def __init__(self, model):
         self.model = model
+        self.current_user = None
 
     def get_user(self, pk):
         '''
@@ -48,12 +49,14 @@ class AuthenticateUser(BaseBackend):
         - Authenticate users with email and password
         '''
         user = self.get_user(pk)
+        self.current_user = user
         self.client_ip(request)
 
         if user:
             _passwd = user.password
             if check_password(password, _passwd):
                 request.session.expire_date = 0
+                request.session['logged_in'] = True
                 request.session['user_email'] = user.email
                 request.session['ip_addr'] = self.ip
                 return True
@@ -89,22 +92,19 @@ class AuthenticateUser(BaseBackend):
         - Checks if the user is authenticated to access a specifc page
         '''
         def wrapfunc(func):
-            def inner_wrap(request):
+            def inner_wrap(request, *args, **kwargs):
 
                 if self.session_login(request):
                     if redirect_true:
                         return redirect(reverse(redirect_true))
                     else:
-                        return func(request)
+                        return func(request, *args, **kwargs)
 
                 else:
                     if redirect_false:
                         return redirect(reverse(redirect_false))
                     else:
-                        return func(request)
+                        return func(request, *args, **kwargs)
             return inner_wrap
         return wrapfunc
 
-    
-    def has_perm(self): 
-        pass

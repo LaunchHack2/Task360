@@ -1,23 +1,32 @@
+import uuid
+
 from django.db import models
 
 # Create your models here.
 
 
-class RegisterModel(models.Model):
-    '''
-    - Stores users email and password
-    '''
-    email = models.EmailField(max_length=200, primary_key=True)
+class UserModel(models.Model):
+    email = models.EmailField(max_length=200, primary_key=True, unique=True)
     password = models.CharField(max_length=200)
 
 
+class TaskModel(models.Model):
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False,
+    )
+    user = models.ForeignKey(
+        UserModel, 
+        on_delete=models.CASCADE, 
+        related_name="user", 
+        null=True, 
+        blank=True,
+       )
+    title = models.CharField(max_length=200, null=True)
+    description = models.TextField(null=True, blank=True)
+    complete = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
 
-class PostModel(models.Model):
-    '''
-    - Stores New Task
-    - Relationship with RegisterModel 
-    - Allows you to know what user created what post
-    '''
-    task = models.CharField(max_length=100, default="Some Task")
-    user = models.ForeignKey(RegisterModel, on_delete=models.CASCADE, related_name='user', default="Some User")
-
+    class Meta: 
+        ordering = ['complete']
