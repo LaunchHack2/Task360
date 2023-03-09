@@ -2,6 +2,7 @@ import secrets
 import json
 import re
 import datetime
+import logging
 
 from itertools import islice
 
@@ -20,9 +21,13 @@ from taskapp import forms
 #from rest_framework.response import Response
 #from rest_framework.decorators import api_view
 
+logging.basicConfig(filename='app.log', level=logging.DEBUG)
+
 
 # Create your views here.
 auth = AuthenticateUser(UserModel)
+
+
 
 
 @auth.is_authenticated(redirect_true='taskapp-account')
@@ -98,16 +103,16 @@ def forgotpassword(request):
         form = forms.ForgotPasswordForm(request.POST)
 
         if form.is_valid():
-            token = secrets.token_urlsafe(32)           
+            token = secrets.token_urlsafe(32) 
 
-            resp.set_cookie('email', form.cleaned_data['email'], max_age=datetime.timedelta(minutes=5), samesite="Strict")
-            resp.set_cookie('token', token, max_age=datetime.timedelta(minutes=5), samesite="Strict")
+            resp.set_cookie('email', form.cleaned_data['email'], max_age=datetime.timedelta(minutes=5), samesite="Lax")
+            resp.set_cookie('token', token, max_age=datetime.timedelta(minutes=5), samesite="Lax")
 
             url = request.build_absolute_uri(f"{reverse('taskapp-setpassword')}?email={form.cleaned_data['email']}&temp_token={token}")
 
             send_mail(
                 subject="Forgot Password",
-                message=f"Change Password: {url}",
+                message=f"Change Password: {url} \n Access page within the same browser window",
                 from_email=None,
                 recipient_list=[form.cleaned_data['email']]
             )
@@ -130,26 +135,26 @@ def setpassword(request):
     check_email = request.GET.get('email') == request.COOKIES.get('email')
 
     if check_token and check_email:
-        pass
+        if request.method == "POST":
+            form = forms.SetPasswordForm(request.POST)
+
+            if form.is_valid():
+                check_password = form.cleaned_data['password'] == form.cleaned_data['confirm_password']
+
+                if check_password: 
+                    p = make_password(form.cleaned_data['password'], salt=secrets.token_hex())
+                    usr = UserModel.objects.get(pk=request.COOKIES['email'])
+                    usr.password = p
+                    usr.save()
+
+                messages.success(request, "Password Changed")
+                return redirect(reverse('taskapp-login'))
+
     else:    
         return redirect(reverse('taskapp-forgotpassword'))
 
-    if request.method == "POST":
-        form = forms.SetPasswordForm(request.POST)
-
-        if form.is_valid():
-            check_password = form.cleaned_data['password'] == form.cleaned_data['confirm_password']
-
-            if check_password: 
-                p = make_password(form.cleaned_data['password'], salt=secrets.token_hex())
-                usr = UserModel.objects.get(pk=request.COOKIES['email'])
-                usr.password = p
-                usr.save()
-
-            return redirect(reverse('taskapp-login'))
 
     return resp
-
 
 
 @auth.is_authenticated(redirect_false='taskapp-login')
@@ -159,7 +164,7 @@ def account(request):
     - Read Task for specifc user
     '''
 
-    tasks = TaskModel.objects.filter(user=auth.current_user)
+    tasks = TaskModel.objects.filter(user=auth.get_user(request.session.get('user_email')))
 
     return render(request, 'taskapp/account.html', context={'tasks': tasks})
 
@@ -172,10 +177,10 @@ def create_task(request):
     form = forms.TaskForm()
 
     if request.method == "POST":
-        form = forms.TaskForm(request.POST)
+        task = TaskModel(user=auth.get_user(request.session.get('user_email')))
+        form = forms.TaskForm(request.POST, instance=task)
 
         if form.is_valid():
-            form.user = auth.current_user
             form.save()
             return redirect(reverse('taskapp-account'))
 

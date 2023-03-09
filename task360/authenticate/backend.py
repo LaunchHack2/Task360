@@ -49,7 +49,6 @@ class AuthenticateUser(BaseBackend):
         - Authenticate users with email and password
         '''
         user = self.get_user(pk)
-        self.current_user = user
         self.client_ip(request)
 
         if user:

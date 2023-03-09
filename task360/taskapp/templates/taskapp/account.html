@@ -5,6 +5,7 @@
 <a href="{% url 'taskapp-logout' %}">Logout</a>
 <html>
     <a href="{% url 'taskapp-createtask' %}">Create Task</a>
+    
     {% for task in tasks %}
     <div>
         <p id="{{ task.id }}">{{ task.title }}</p>
