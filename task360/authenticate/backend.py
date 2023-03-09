@@ -68,9 +68,10 @@ class AuthenticateUser(BaseBackend):
         - Allow users to login with a session
         '''
         session_ip_addr = request.session.get('ip_addr')
+        logged_in = request.session.get('logged_in')
         self.client_ip(request)
 
-        if session_ip_addr == self.ip:
+        if session_ip_addr == self.ip and logged_in:
 
             try:
                 s = Session.objects.get(pk=request.COOKIES.get('sessionid'))
