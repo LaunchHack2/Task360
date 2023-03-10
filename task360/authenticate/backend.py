@@ -1,9 +1,14 @@
+import json
+import hashlib
+
 from django.shortcuts import redirect
 from django.urls import reverse
 
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.hashers import check_password
 from django.contrib.sessions.models import Session
+
+from task360.settings import SECRET_KEY
 
 # My Custom Authenticator Class
 
@@ -108,3 +113,16 @@ class AuthenticateUser(BaseBackend):
             return inner_wrap
         return wrapfunc
 
+    @staticmethod
+    def hash_msg(msg: dict) -> str:
+        enc_msg = json.dumps(msg).encode()
+        hash_msg = hashlib.md5(enc_msg)
+
+        return hash_msg.hexdigest()
+
+    @staticmethod
+    def verify_hash(old: str, new: str) -> bool:
+        if old == new:
+            return True
+        else:
+            return False
