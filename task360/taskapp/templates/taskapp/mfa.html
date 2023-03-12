@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block body %}
+{% load static %}
+<img src="{% static 'imgs/qr_code.png'%}" alt="qrcode2mfa">
+<form method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<p>{{ bool }}</p>
+<button type="submit">Submit</button>
+</form>
+{% endblock %}

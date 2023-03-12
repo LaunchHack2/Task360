@@ -80,3 +80,7 @@ class TaskForm(forms.ModelForm):
     class Meta: 
         model = TaskModel
         exclude = ['user']
+
+
+class MFAForm(forms.Form):
+    code = forms.CharField(widget=forms.NumberInput, required=True)

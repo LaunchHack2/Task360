@@ -7,3 +7,5 @@ pyvenv.cfg
 workflow.txt
 migrations/
 app.log
+imgs/
+share/

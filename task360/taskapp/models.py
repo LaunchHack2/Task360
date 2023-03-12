@@ -30,3 +30,9 @@ class TaskModel(models.Model):
 
     class Meta: 
         ordering = ['complete']
+
+
+class OTPModel(models.Model): 
+    key = models.CharField(max_length=32, unique=True, blank=True, null=True)
+    url = models.URLField(unique=True, blank=True, null=True)
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='otp_user')

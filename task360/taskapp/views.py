@@ -1,6 +1,7 @@
 import secrets
 import datetime
 
+
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
@@ -58,13 +59,28 @@ def login(request):
             password = form.cleaned_data.get('password')
 
             if auth.login(request, email, password):
-                messages.success(request, 'Successfully Logged In')
-                return redirect(reverse('taskapp-account'))
+                auth.generateOTP(pk=email)
+                return redirect(reverse('taskapp-mfa') + f'?email={email}')
 
         messages.error(request, 'Invalid Credentials')
         return redirect('taskapp-login')
 
     return resp
+
+
+@auth.is_authenticated(redirect_true='taskapp-account', mfa=True)
+def mfa(request):
+    form = forms.MFAForm()
+
+    if request.method == 'POST':
+        form = forms.MFAForm(request.POST)
+
+        if form.is_valid():
+            code = form.cleaned_data.get('code')
+            auth.verifyOTP(request, code)
+            return redirect('taskapp-account')
+
+    return render(request, 'taskapp/mfa.html', context={'form': form})
 
 
 @auth.is_authenticated(redirect_false='taskapp-login')
@@ -142,7 +158,7 @@ def setpassword(request):
                 if check_password:
                     p = make_password(
                         form.cleaned_data['password'], salt=secrets.token_hex())
-                    usr = UserModel.objects.get(pk=request.COOKIES['email'])
+                    usr = UserModel.objects.get(pk=request.GET.get('email'))
                     usr.password = p
                     usr.save()
 
