@@ -6,6 +6,7 @@ from taskapp import views
 urlpatterns = [
     path('', views.register, name='taskapp-register'),
     path('login', views.login, name='taskapp-login'), 
+    path('login/mfa', views.mfa, name='taskapp-mfa'),
     path('logout', views.logout, name='taskapp-logout'),
     path('forgotpassword', views.forgotpassword, name='taskapp-forgotpassword'), 
     path('setpassword', views.setpassword, name='taskapp-setpassword'),
