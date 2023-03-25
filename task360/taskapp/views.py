@@ -16,8 +16,7 @@ from taskapp import forms
 
 from task360.settings import SECRET_KEY
 
-# from rest_framework.response import Response
-# from rest_framework.decorators import api_view
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 # Create your views here.
 auth = AuthenticateUser(UserModel)
@@ -70,6 +69,9 @@ def login(request):
 
 @auth.is_authenticated(redirect_true='taskapp-account', mfa=True)
 def mfa(request):
+    '''
+    - Performs MFA (Multi-Factor Authentication)
+    '''
     form = forms.MFAForm()
 
     if request.method == 'POST':
@@ -197,6 +199,7 @@ def create_task(request):
 
         if form.is_valid():
             form.save()
+
             return redirect(reverse('taskapp-account'))
 
     return render(request, 'taskapp/create_task.html', context={'form': form})
@@ -214,20 +217,18 @@ def delete_task(request, id):
 
 @auth.is_authenticated(redirect_false='taskapp-login')
 def edit_task(request, id):
-    # Possiblity: @api_view['GET']
-    # Might make this an api_view function
     '''
-    - Edit Task through query parameters
+    - Allows user to edit task
     '''
     task_instance = get_object_or_404(TaskModel, pk=id)
+    task_instance.edited = True
+    form = forms.TaskForm(instance=task_instance)
 
-    if request.method == "GET":
-        t = request.GET.get('title')
-        desc = request.GET.get('desc', '')
+    if request.method == "POST": 
+        form = forms.TaskForm(request.POST, instance=task_instance)
+        
+        if form.is_valid():
+            form.save()
+            return redirect('taskapp-account')
 
-        task_instance.title = t
-        task_instance.desc = desc
-
-        task_instance.save()
-
-    return redirect('taskapp-account')
+    return render(request, 'taskapp/edit_task.html', context={'form': form})

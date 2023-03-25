@@ -9,3 +9,5 @@ migrations/
 app.log
 imgs/
 share/
+.vscode
+dump.rdb

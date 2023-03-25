@@ -1,4 +1,5 @@
 import secrets
+import json
 
 from django import forms
 from django.core.validators import validate_email, validate_slug
@@ -6,6 +7,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password, check_password
 
 from taskapp.models import TaskModel, UserModel
+
+
 
 
 # Custom Validators
@@ -79,7 +82,7 @@ class TaskForm(forms.ModelForm):
     
     class Meta: 
         model = TaskModel
-        exclude = ['user']
+        exclude = ['user', 'inital_notify', 'edited']
 
 
 class MFAForm(forms.Form):
