@@ -4,3 +4,10 @@ lib/
 lib64
 pyvenv.cfg
 *__pycache__
+workflow.txt
+migrations/
+app.log
+imgs/
+share/
+.vscode
+dump.rdb

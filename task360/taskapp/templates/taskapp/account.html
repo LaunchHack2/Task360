@@ -1,10 +1,23 @@
 {% extends 'base.html' %}
 
 {% block body %}
+
 <a href="{% url 'taskapp-logout' %}">Logout</a>
+<html>
+    <a href="{% url 'taskapp-createtask' %}">Create Task</a>
+    
+    {% for task in tasks %}
+    <div>
+        <p id="{{ task.id }}">{{ task.title }}</p>
+        <li><a href="{% url 'taskapp-edit_task' task.id %}">Edit Task</a></li>
+        <li><a href="{% url 'taskapp-deletetask' task.id %}">Delete Task</a></li>
+    </div>
+    {% endfor %}
+
+</html>
 {% endblock %}
 
 {% block script %}
 {% load static %}
-<script src="{% static  'js/task.js' %}"></script>
+<script src="{% static 'js/task.js' %}"></script>
 {% endblock %}

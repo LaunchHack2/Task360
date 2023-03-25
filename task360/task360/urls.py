@@ -19,5 +19,6 @@ from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', lambda req: redirect('taskapp-register')),
     path('taskapp/', include('taskapp.urls')),
 ]
