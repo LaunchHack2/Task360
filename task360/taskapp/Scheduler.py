@@ -10,9 +10,6 @@ from celery.result import AsyncResult
 from django_celery_beat.schedulers import DatabaseScheduler
 from taskapp.models import MyPeriodicTask
 
-from django.core.cache import caches
-
-db_cache = caches.all()[0]
 
 logger = get_logger(__name__)
 debug, info, error, warning = (logger.debug, logger.info,

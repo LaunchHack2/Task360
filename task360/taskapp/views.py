@@ -11,12 +11,12 @@ from django.shortcuts import get_object_or_404
 
 from authenticate.backend import AuthenticateUser
 
-from taskapp.models import UserModel, TaskModel
+from taskapp.models import UserModel, TaskModel, MyPeriodicTask
 from taskapp import forms
+from taskapp import tasks
 
 from task360.settings import SECRET_KEY
 
-from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 # Create your views here.
 auth = AuthenticateUser(UserModel)
@@ -59,7 +59,7 @@ def login(request):
 
             if auth.login(request, email, password):
                 auth.generateOTP(pk=email)
-                return redirect(reverse('taskapp-mfa') + f'?email={email}')
+                return redirect(reverse('taskapp-mfa'))
 
         messages.error(request, 'Invalid Credentials')
         return redirect('taskapp-login')
@@ -80,6 +80,13 @@ def mfa(request):
         if form.is_valid():
             code = form.cleaned_data.get('code')
             auth.verifyOTP(request, code)
+            tasks.periodic_email.delay(
+                topic='Task360 Login',
+                msg=f'{request.session.get("user_email")} logged in from {request.session.get("ip_addr")}',
+                _from='test@gmail.com',
+                to='to@gmail.com'
+            )
+
             return redirect('taskapp-account')
 
     return render(request, 'taskapp/mfa.html', context={'form': form})
@@ -173,7 +180,7 @@ def setpassword(request):
     return resp
 
 
-@auth.is_authenticated(redirect_false='taskapp-login')
+@auth.is_authenticated(redirect_false='taskapp-mfa')
 def account(request):
     '''
     - Account Page
@@ -224,9 +231,9 @@ def edit_task(request, id):
     task_instance.edited = True
     form = forms.TaskForm(instance=task_instance)
 
-    if request.method == "POST": 
+    if request.method == "POST":
         form = forms.TaskForm(request.POST, instance=task_instance)
-        
+
         if form.is_valid():
             form.save()
             return redirect('taskapp-account')
