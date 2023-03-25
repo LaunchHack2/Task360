@@ -11,3 +11,4 @@ imgs/
 share/
 .vscode
 dump.rdb
+db.sqlite3

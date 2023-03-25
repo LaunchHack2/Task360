@@ -145,7 +145,7 @@ class AuthenticateUser(BaseBackend):
             OTPModel(key=key, url=otp_url, user=current_user).save()
 
     def verifyOTP(self, request, code):
-        current_user = self.get_user(request.GET.get('email'))
+        current_user = self.get_user(request.session.get('user_email'))
 
         usr_key = OTPModel.objects.get(user=current_user).key
         totp_qr = pyotp.TOTP(usr_key)
