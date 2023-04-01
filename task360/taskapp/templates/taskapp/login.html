@@ -1,6 +1,8 @@
 {% extends 'index.html' %}
 
 {% block head %}
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/form.css' %}">
     <title>Login</title>
 {% endblock %}
 
@@ -18,8 +20,11 @@
     {{ form.password }}
 {% endblock %}
 
+{% block button_text %}
+    Login
+{% endblock %}
+
 {% block action %}
-    <button type="submit">Login</button>
     <a href="{% url 'taskapp-register' %} "> Need An Account </a>
     <a href="{% url 'taskapp-forgotpassword' %}"> Forgot Password </a>
 {% endblock %}

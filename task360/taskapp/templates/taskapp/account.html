@@ -1,20 +1,150 @@
 {% extends 'base.html' %}
+{% block head %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/account.css' %}">
+{% endblock %}
+
 
 {% block body %}
+<div class="AccountPage-container">
+    <nav>
+      <span>Dashboard</span> 
+      <ul class="navbar_list">
+        <li><a href="{% url 'taskapp-logout' %}">Logout</a></li>
+        <li><a href="">Profile</a></li>
+      </ul>
+    </nav>
+    <main>
+      <div class="taskgrid-container">
+        <div class="task-dashboard">
+          <div class="active-container">
+            
+            <div class="cardlist">
+              <div class="card card1">
+                <div class="card-content">
+                  <span>10</span>
+                  <p>Completed Tasks</p>
+                </div>
+              </div>
+              
+              <div class="card card1">
+                <div class="card-content">
+                  <span>10</span>
+                  <p>Completed Tasks</p>
+                </div>
+              </div>
+              
+              <div class="card card1">
+                <div class="card-content">
+                  <span>10</span>
+                  <p>Completed Tasks</p>
+                </div>
+              </div>
+              
+              
+            </div>
+            
+          </div>
+          <div class="current-task-container">
+            <div class="goal-container">
+                <div class="goal-headers">
+                    <h1>Main Goal</h1>
+                    <p data-addtask="True">Add Task +</p>
+                </div>            
+              <div class="tasklist">
+                
+                <div class="tasklist-headers">
+                <p>Task</p>
+                <p>Department</p>
+                <p>Due Date</p>
+                <p>Status</p>
+                </div>
 
-<a href="{% url 'taskapp-logout' %}">Logout</a>
-<html>
-    <a href="{% url 'taskapp-createtask' %}">Create Task</a>
-    
-    {% for task in tasks %}
-    <div>
-        <p id="{{ task.id }}">{{ task.title }}</p>
-        <li><a href="{% url 'taskapp-edit_task' task.id %}">Edit Task</a></li>
-        <li><a href="{% url 'taskapp-deletetask' task.id %}">Delete Task</a></li>
+                {% for task in tasks %}
+                <div id="{{ task.id }}" data-description="{{ task.description }}" 
+                data-status="{{ task.status}}" data-notify="{{ task.notify }}"
+                data-period="{{ task.period }}" class="task">
+                  <div class="name">
+                    {{ task.title }} </div>
+                  <div class="department">
+                    FrontEnd
+                  </div>
+                  <div class="due-date">
+                    Due Date
+                  </div>
+                  <div class="status">
+                    <p class="p_status {{ task.status }}">{{ task.status }}</p>
+                  </div>
+                </div>
+                {% endfor %}
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div class="create_edit_box">
+        <div class="create_edit_formgrid">
+            {% csrf_token %}
+            <div class="task_title">
+            </div>
+            <div class="assign">
+                <select name="Assignee" id="asignee">
+                    <option value="user">keshawn.strong02@gmail.com</option>
+                </select>
+            </div>
+            <div class="due_date">
+                <input type="datetime-local" name="duedate" id="due">
+            </div>
+            <div class="description">
+                <textarea class='desc' placeholder="Type Description..."></textarea>
+            </div>
+            <div class="period">
+                <span>Period: </span>
+                <select name="Period" id="period">
+                    <option value="days">Day</option>
+                    <option value="hours">Hour</option>
+                    <option value="minutes">Minute</option>
+                    <option value="seconds">Second</option>
+                </select>
+            </div>
+
+            <div class="status">
+              <span>Status:</span>
+              <select class="status-select">
+                <option value="Notdone">Not Done</option>
+                <option value="Completed">Completed</option>
+                <option value="Inprocess">In process</option>
+              </select>
+            </div>
+
+            <div class="notify">
+                <span>Notify after: </span>
+                <input type="number" min="0" name="notify">
+            </div>
+
+            <div class="delete task-options">
+                <p class="delete-task">Delete</p>
+                <p class="create-task">Create</p>
+                <p class="edit-task">Edit</p>
+            </div>
+
+        </div>
     </div>
-    {% endfor %}
 
-</html>
+    <div id=sidebar>
+      <div class="sidebar-wrapper">
+        <p>John Doe</p>
+        <ul class="sidebar-list">
+          <li><a href="">Accounts</a></li>
+          <li><a href="">Projects</a></li>
+          <li><a href="">Inventory</a></li>
+          <li><a href="">Settings</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block script %}

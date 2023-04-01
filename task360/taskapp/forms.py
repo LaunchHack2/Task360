@@ -79,7 +79,7 @@ class TaskForm(forms.ModelForm):
     
     class Meta: 
         model = TaskModel
-        exclude = ['user', 'inital_notify', 'edited']
+        exclude = ['user', 'created_on', 'complete', 'edited']
 
 
 class MFAForm(forms.Form):

@@ -4,6 +4,7 @@ from celery import shared_task
 from django.core.mail import send_mail
 
 
+
 @shared_task()
 def periodic_email(topic:str, msg:str, _from:str, to:str) -> None:
 
@@ -18,4 +19,8 @@ def periodic_email(topic:str, msg:str, _from:str, to:str) -> None:
     return "Email sent"
 
 
-
+@shared_task
+def create_new_task(taskmodel_obj, data):
+    taskmodel_obj.title = data['title']
+    taskmodel_obj.description = data['description']
+    taskmodel_obj.notify = data['notify']
