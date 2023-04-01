@@ -7,13 +7,13 @@ from django.urls import reverse
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import make_password
-from django.shortcuts import get_object_or_404
 
 from authenticate.backend import AuthenticateUser
 
-from taskapp.models import UserModel, TaskModel, MyPeriodicTask
+from taskapp.models import UserModel, TaskModel
 from taskapp import forms
 from taskapp import tasks
+
 
 from task360.settings import SECRET_KEY
 
@@ -180,62 +180,24 @@ def setpassword(request):
     return resp
 
 
-@auth.is_authenticated(redirect_false='taskapp-mfa')
+@auth.is_authenticated(redirect_false='taskapp-login')
 def account(request):
     '''
     - Account Page
     - Read Task for specifc user
+    - Edit Task for specifc user via 'API'
     '''
-
-    tasks = TaskModel.objects.filter(
-        user=auth.get_user(request.session.get('user_email')))
+    current_user = auth.get_user(request.session.get('user_email'))
+    tasks = TaskModel.objects.filter(user=current_user)
 
     return render(request, 'taskapp/account.html', context={'tasks': tasks})
 
 
 @auth.is_authenticated(redirect_false='taskapp-login')
-def create_task(request):
-    '''
-    - Creates Task
-    '''
-    form = forms.TaskForm()
-
-    if request.method == "POST":
-        task = TaskModel(user=auth.get_user(request.session.get('user_email')))
-        form = forms.TaskForm(request.POST, instance=task)
-
-        if form.is_valid():
-            form.save()
-
-            return redirect(reverse('taskapp-account'))
-
-    return render(request, 'taskapp/create_task.html', context={'form': form})
-
-
-@auth.is_authenticated(redirect_false='taskapp-login')
 def delete_task(request, id):
     '''
-    - Delete Task
+    - Deletes Task
     '''
     delete_task = TaskModel.objects.get(pk=id).delete()
 
     return redirect('taskapp-account')
-
-
-@auth.is_authenticated(redirect_false='taskapp-login')
-def edit_task(request, id):
-    '''
-    - Allows user to edit task
-    '''
-    task_instance = get_object_or_404(TaskModel, pk=id)
-    task_instance.edited = True
-    form = forms.TaskForm(instance=task_instance)
-
-    if request.method == "POST":
-        form = forms.TaskForm(request.POST, instance=task_instance)
-
-        if form.is_valid():
-            form.save()
-            return redirect('taskapp-account')
-
-    return render(request, 'taskapp/edit_task.html', context={'form': form})

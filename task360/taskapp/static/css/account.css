@@ -1,0 +1,371 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+:root {
+  --baby-blue: #8AAAE5;
+  --my-grey: rgba(232, 236, 241, 1);
+  --cherry-red: #EE3030;  
+  --peach: #FFA16C;
+  --success: #39CE62;
+  --not-done: #C70039;
+  --inprocess: #FFC300;
+}
+
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+html {
+    overflow: hidden;
+}
+
+
+.AccountPage-container {
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 0.1fr;
+  grid-template-rows: 0.2fr 1fr 1fr;
+  grid-template-areas: 
+    "sidebar sidebar nav nav"
+    "sidebar sidebar main main"
+    "sidebar sidebar main main"
+}
+
+a {
+    text-decoration: none;
+    color: black;
+  }
+
+nav {
+  grid-area: nav;
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.navbar_list {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-right: 2rem;
+  padding: 0.4rem;
+}
+
+nav span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+main {
+  grid-area: main;
+  padding: 1rem;
+}
+
+.taskgrid-container {
+  display: grid;
+  grid-auto-flow: column;
+  height: 100%;
+}
+
+.task-dashboard {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 0.25fr 1fr;
+  padding: 1rem;
+}
+
+.active-container{
+  grid-column: 1 / span 3;
+}
+
+.cardlist {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 1.3rem;
+  height: 100%;
+  padding: 0.7rem;
+}
+
+.card {
+  padding: 0.3rem;
+  display: flex;
+  justify-content: flex-end;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-right: 2rem;
+  margin-top: 1rem;
+}
+
+.card-content span {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.current-task-container {
+  grid-row: 2;
+  grid-column: 1 / span 4;
+  margin-top: 0.2rem;
+}
+
+.goal-container {
+  display: grid;
+  gap: 1.2rem;
+  padding: 0.7rem;
+  box-shadow: 2px 2px 3px rgba(0,0,0,0.1);
+  border-radius: 0.3rem;
+}
+
+.goal-headers {
+    display: flex;
+    justify-content: space-between;
+}
+
+.goal-headers p {
+    cursor: pointer;
+    transition: color 250ms ease-in-out;
+}
+
+.goal-headers p:hover {
+    color: white;
+}
+
+.task, .tasklist-headers {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
+
+.tasklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.task {
+  color: var(--my-grey);
+  align-items: center;
+  transition: all 250ms ease-in-out;
+  border-radius: 0.25rem;
+}
+
+.task:hover {
+    background: black;
+
+}
+
+
+.task_title h1 {
+    transition: all 100ms ease-in;
+}
+
+input {
+    border: none;
+    outline: none;
+    padding: 0.5rem;
+    width: 100%;
+}
+
+.taskname {
+    width: 100%;
+    border-bottom: 1px solid solid silver;
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.taskname::placeholder {
+    transition: color 250ms ease-in-out;
+}
+
+.taskname:focus::placeholder {
+    color: transparent;
+}
+
+
+#sidebar {
+  grid-area: sidebar;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+
+.sidebar-list {
+  padding: 1rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sidebar-wrapper p {
+  padding: 1rem;
+  margin-left: 1rem;
+}
+
+.sidebar-list li {
+  padding: 1rem;
+}
+
+.sidebar-list li:nth-child(1):hover {
+  background:#2F3C7E;
+}
+
+.sidebar-list li:nth-child(2):hover {
+  background: #315399;
+}
+
+.sidebar-list li:nth-child(3):hover {
+  background: #45A8E5
+}
+.sidebar-list li:nth-child(4):hover {
+  background: #457DE5;
+}
+
+.p_status{
+    padding: 0.5rem;
+    color: white;
+}
+
+.Completed {
+  background: var(--success);
+}
+
+.Notdone {
+    background: var(--not-done); 
+}
+
+.Inprocess {
+    background: var(--inprocess);
+}
+
+.create_edit_box {
+    height: 800px;
+    width: 500px;
+    position: absolute;
+    right: -600px;
+    top: 5.4rem;
+    transition: all 0.4s ease-in-out;
+    background: var(--my-grey);
+}
+
+.create_edit_box.active {
+    right: 0px;
+}
+
+.create_edit_formgrid {
+    display: grid; 
+    grid-auto-flow: row;
+    gap: 1rem;
+    padding: 2rem;
+}
+
+select {
+    padding: 0.5rem;
+    outline: none;
+    border: none;
+    background: white;
+    width: 100%;
+}
+
+select option {
+    padding: 0.5rem;
+}
+
+.desc {
+    width: 100%; 
+    height: 59px;
+    padding: 0.6rem;
+    outline: none;
+    resize: none;
+    border-radius: 0.25rem;
+}
+
+.task-options {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.delete-task, .create-task, .edit-task {
+    cursor: pointer;
+    color: var(--cherry-red);
+    background: white;
+    width:fit-content;
+    padding: 0.5rem 1rem;
+    transition: background-color 200ms ease-in;
+}
+
+.create-task {
+  color: var(--success);
+}
+
+.edit-task {
+  color: var(--peach);
+}
+
+.edit-task:hover {
+  background: var(--peach);
+  color: white;
+}
+
+.create-task:hover {
+  background: var(--success);
+  color: white;
+}
+
+.delete-task:hover {
+    background: var(--cherry-red);
+    color: white;
+}
+
+/*HOVER EFFECTS */
+.navbar_list li a, .sidebar-list li {
+  transition: all 250ms ease-in-out;
+}
+
+.navbar_list li a:hover {
+  color: var(--baby-blue);
+}
+
+.name:hover {
+    cursor: pointer;
+}
+
+/*FONTS*/
+
+
+/* FONT COLOR */
+.card-content p, .sidebar-list li a {
+  color: rgba(239, 239, 240, 1)
+}
+
+/*COLORS*/
+.goal-container h1, .tasklist-headers p, .card-content span {
+  color: #253355;
+}
+
+.sidebar-list {
+  background: black;
+}
+
+#sidebar, .card, .goal-container {
+  background:var(--baby-blue);
+}
+
+main {
+  background: var(--my-grey);
+}
+

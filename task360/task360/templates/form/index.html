@@ -1,54 +1,52 @@
 {% extends 'base.html' %}
 
-{% block head %}
-{% block index_head %} {% endblock %}
-{% endblock %}
-
 {% block body %}
 <body>
-    <div class="register-box">
-
+    <div class="generic-grid-container">
+      {% if messages %}
+        <div class="messages">
+            {% for msg in messages %} 
+            <strong>{{ msg }}</strong>
+            <button type="button" class="close">x</button>
+            {% endfor %}     
+          </div>
+      {% endif %}
     
-      <div class="messages">
-        {% if messages %}
-        {% for msg in messages %} 
-        <strong>{{ msg }}</strong>
-        <button type="button" class="close">&times;</button>
-        {% endfor %} 
-        {% endif %}
-
+      <div class="form-container"> 
+        <form class=generic-form method='POST'>
+            {% csrf_token %}
+            
+          <div id="header">
+            {% block header %}{% endblock %}
+          </div>
+          
+          <div class="form-item-container">
+           <div class="form-item username">
+             {% block username %}{% endblock %}
+            </div> 
+            
+            <div class="form-item email">
+              {% block email %}{% endblock %}
+            </div>
+            
+            <div class="form-item password">
+              {% block password %}{% endblock %}
+            </div>
+            
+            <div class="form-item button">
+              <button>{% block button_text%}{%endblock%}</button>
+            </div>
+            
+          </div>
+          
+          <div class="actions">
+            {% block action %}{% endblock %}
+          </div>
+        </form>
+        
       </div>
-
       
-    <div class="register-container">
-        <div class="header">
-        {% block header %}
-        {% endblock %}
-        </div>
-
-      <form class="register-form" method="POST"> 
-        {% csrf_token %}
-
-        <div class='container'>
-        {% block username %}
-        {% endblock %}
-        </div>
-
-        <div class='container email-container'>
-        {% block email %}
-        {% endblock %}
-        </div>
-
-        <div class='container'>
-        {% block password %}
-        {% endblock %}
-        </div>
-
-        {% block action %}
-        {% endblock %}
-
-      </form>
-    </div>
     </div>
   </body>
+
 {% endblock %}
