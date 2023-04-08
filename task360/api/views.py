@@ -6,6 +6,8 @@ from authenticate.backend import AuthenticateUser
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from taskapp import tasks
+
 auth = AuthenticateUser(UserModel)
 
 @auth.is_authenticated(redirect_false='taskapp-login')
@@ -18,16 +20,16 @@ def create_edit_task(request):
 
     edit_id = request.GET.get('task_id', None)
     data = json.loads(request.data)
+    user = request.session.get('user_email')
 
     if not edit_id:
-        task = TaskModel(user=auth.get_user(request.session.get('user_email')))
+        task = TaskModel(user=auth.get_user(user))
         task.title = data['title'].replace('\n', '')
         task.description = data['description']
         task.period = data['period']
         task.notify = int(data['notify'])
         task.status = data['status']
         task.save()
-        #tasks.create_new_task.delay(task, data)
     else: 
         task = TaskModel.objects.get(pk=edit_id)
         task.edited = True
@@ -39,3 +41,4 @@ def create_edit_task(request):
         task.save()
 
     return Response({'data': 'completed'})
+

@@ -94,21 +94,14 @@
                     <option value="user">keshawn.strong02@gmail.com</option>
                 </select>
             </div>
+            <!--datetime-local is disabled-->
             <div class="due_date">
                 <input type="datetime-local" name="duedate" id="due">
             </div>
             <div class="description">
                 <textarea class='desc' placeholder="Type Description..."></textarea>
             </div>
-            <div class="period">
-                <span>Period: </span>
-                <select name="Period" id="period">
-                    <option value="days">Day</option>
-                    <option value="hours">Hour</option>
-                    <option value="minutes">Minute</option>
-                    <option value="seconds">Second</option>
-                </select>
-            </div>
+   
 
             <div class="status">
               <span>Status:</span>
@@ -123,6 +116,16 @@
                 <span>Notify after: </span>
                 <input type="number" min="0" name="notify">
             </div>
+
+            <div class="period">
+              <span>Period: </span>
+              <select name="Period" id="period">
+                  <option value="days">Day</option>
+                  <option value="hours">Hour</option>
+                  <option value="minutes">Minute</option>
+                  <option value="seconds">Second</option>
+              </select>
+          </div>
 
             <div class="delete task-options">
                 <p class="delete-task">Delete</p>
