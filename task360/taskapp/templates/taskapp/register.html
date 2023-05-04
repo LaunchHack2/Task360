@@ -12,6 +12,11 @@
     <span class="header">Register</span>
 {% endblock %}
 
+{% block username %}
+{{ form.username.errors }}
+{{ form.username }}
+{% endblock %}
+
 {% block email %}
  {{ form.email.errors }}
  {{ form.email }}

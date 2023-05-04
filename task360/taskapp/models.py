@@ -10,6 +10,7 @@ from django.db.models import signals
 from django.dispatch import receiver
 from django_celery_beat.models import PeriodicTask
 
+from rest_framework import serializers
 
 
 # Create your models here.
@@ -17,10 +18,46 @@ from django_celery_beat.models import PeriodicTask
 
 class UserModel(models.Model):
     '''
-    - Creates a user
+    - Represents a user
     '''
+    username = models.CharField(
+        max_length=100, null=True, blank=True, unique=True)
     email = models.EmailField(max_length=200, primary_key=True, unique=True)
     password = models.CharField(max_length=200)
+
+    def __repr__(self):
+        return self.username
+
+
+class GroupModel(models.Model):
+    '''
+    - Represents a Group
+    - Users and Tasks can be added to group
+    '''
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+
+    groupowner = models.ForeignKey(
+        UserModel,
+        on_delete=models.CASCADE,
+        related_name="owner",
+        null=True,
+        blank=True
+    )
+    groupname = models.CharField(max_length=100)
+    groupusers = models.ManyToManyField(UserModel)
+    grouptasks = models.ManyToManyField("TaskModel")
+
+    def __repr__(self) -> str:
+        return self.groupname
+
+class GroupModelSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = GroupModel
+        fields = ['groupusers']
 
 
 class TaskModel(models.Model):
@@ -40,13 +77,21 @@ class TaskModel(models.Model):
         null=True,
         blank=True,
     )
+
+    group = models.ForeignKey(
+        GroupModel,
+        on_delete=models.CASCADE,
+        related_name="group",
+        null=True,
+        blank=True
+    )
+
     title = models.CharField(max_length=200, null=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(default="None", null=True, blank=True)
     complete = models.BooleanField(default=False)
     created_on = models.DateTimeField(auto_now_add=True)
     notify = models.PositiveIntegerField(blank=True, null=True)
     edited = models.BooleanField(default=False)
-
 
     period = models.CharField(
         max_length=12,
@@ -56,37 +101,29 @@ class TaskModel(models.Model):
     )
 
     status_choices = (
-        ("Notdone", "not done"), 
-        ("Completed", "complete"), 
+        ("Notdone", "not done"),
+        ("Completed", "complete"),
         ("Inprocess", "inprocess"),
     )
 
     status = models.CharField(
-        max_length=12, 
-        choices=status_choices, 
+        max_length=12,
+        choices=status_choices,
         default="Notdone"
     )
-
 
     class Meta:
         ordering = ['complete']
 
 
-#class TrackTaskChanges(models.Model): 
-#    '''
-#    - Track Changes Across Tasks
-#    - For now, only tracks task status
-#    '''
-#    task = models.OneToOneField(TaskModel, on_delete=models.CASCADE, related_name='task', blank=True, null=True)
-#    original_status = models.CharField(default="Notdone", max_length=20)
-#    updated_status = models.CharField(default="Notdone", max_length=20)
-#    status_state = models.BooleanField(default=False)
-#
-#    def clean(self) -> None: 
-#        if self.original_status == self.updated_status: 
-#            self.status_state = False
-#        else: 
-#            self.status_state = True
+class TaskModelSerialzer(serializers.ModelSerializer):
+    class Meta: 
+        model = TaskModel
+        fields = ['status', 'period', 'notify', 'description', 'title', 'group', 'id']
+
+
+class MainGoalModel(models.Model):
+    pass
 
 
 class OTPModel(models.Model):
@@ -121,7 +158,6 @@ class MyPeriodicTask(PeriodicTask):
     task_model_uuid = models.UUIDField(null=True, blank=True)
 
 
-
 def check_time(func):
     def wrapfunc(*args, **kwargs):
 
@@ -136,7 +172,7 @@ def check_time(func):
             time = IntervalSchedule.DAYS
         elif instance.period == "seconds":
             time = IntervalSchedule.SECONDS
-        else: 
+        else:
             time = None
 
         if time != None:
@@ -145,7 +181,7 @@ def check_time(func):
                 period=time
             )
             return func(*args, **kwargs, sched=schedule)
-        else: 
+        else:
             return func(*args, **kwargs, time=time)
     return wrapfunc
 
@@ -157,51 +193,47 @@ def post_save_email(sender, instance, signal, *args, **kwargs):
         - Checks if the task has been edited
         - If edited, create a new notification for the user
     '''
-    
-    task_name = f"{secrets.randbits(32)}task" 
+
+    task_name = f"{secrets.randbits(32)}task"
 
     if instance.edited:
         if instance.status == 'Completed':
-            try: 
-                MyPeriodicTask.objects.get(task_model_uuid=instance.id).delete()
-            except: 
+            try:
+                MyPeriodicTask.objects.get(
+                    task_model_uuid=instance.id).delete()
+            except:
                 pass
-        
-        else: 
-             MyPeriodicTask.objects.create(
+
+        else:
+            MyPeriodicTask.objects.create(
                 interval=kwargs['sched'],
-                name=task_name, 
-                task_model_uuid=instance.id, 
+                name=task_name,
+                task_model_uuid=instance.id,
                 task='taskapp.tasks.periodic_email',
                 kwargs=json.dumps({
-                    'topic': f"Notification for: {instance.title}", 
-                    "msg": instance.description, 
+                    'topic': f"Notification for: {instance.title}",
+                    "msg": instance.description,
                     "_from": 'test@gmail.com',
                     'to': 'to@gmail.com'
-                }), 
-                one_off=True, 
-                enabled=True, 
+                }),
+                one_off=True,
+                enabled=True,
                 expires=datetime.utcnow() + timedelta(minutes=15)
-        )
+            )
 
-    else: 
+    else:
         MyPeriodicTask.objects.create(
-                interval=kwargs['sched'],
-                name=task_name, 
-                task_model_uuid=instance.id, 
-                task='taskapp.tasks.periodic_email',
-                kwargs=json.dumps({
-                    'topic': f"Notification for: {instance.title}", 
-                    "msg": instance.description, 
-                    "_from": 'test@gmail.com',
-                    'to': 'to@gmail.com'
-                }), 
-                one_off=True, 
-                enabled=True, 
-                expires=datetime.utcnow() + timedelta(minutes=15)
+            interval=kwargs['sched'],
+            name=task_name,
+            task_model_uuid=instance.id,
+            task='taskapp.tasks.periodic_email',
+            kwargs=json.dumps({
+                'topic': f"Notification for: {instance.title}",
+                "msg": instance.description,
+                "_from": 'test@gmail.com',
+                'to': 'to@gmail.com'
+            }),
+            one_off=True,
+            enabled=True,
+            expires=datetime.utcnow() + timedelta(minutes=15)
         )
-
-
-@receiver(signals.pre_save, sender=TaskModel)
-def pre_task_pending(sender, instance, signal, *args, **kwargs):
-    pass

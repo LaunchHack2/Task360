@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+
+{% block header %}
+    <span class="header">Create Group</span>
+{% endblock %}
+
+{% block username %}
+    {{ form.groupname.errors }}
+    {{ form.groupname }}
+{% endblock %}
+
+{% block button_text %}
+    Create Group
+{% endblock %}

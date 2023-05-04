@@ -48,36 +48,6 @@ async function postData(url="", body={}){
 
 
 
-tasks.forEach((task) => {
-    task.addEventListener('click', (event) => {
-        const dataset = task.parentElement.dataset
-        create_task_btn.style.display = "none"
-        edit_task_btn.style.display = "block"
-        delete_task.style.display = "block"
-
-        if (create_edit_box.classList.length == 2) {
-            title_h1.innerText = task.innerHTML
-            create_edit_box.setAttribute('id', task.parentElement.id)
-            desc.value = dataset.description
-            period.value = dataset.period
-            task_status.value = dataset.status
-            notify.value = dataset.notify
-            title_h1.innerText = task.innerHTML
-        }
-        else {
-            create_edit_box.classList.toggle('active')
-            create_edit_box.setAttribute('id', task.parentElement.id)
-            desc.value = dataset.description
-            period.value = dataset.period
-            task_status.value = dataset.status
-            notify.value = dataset.notify
-            title_h1.innerText = task.innerHTML
-            task_title.appendChild(title_h1)
-        }
-    })
-})
-
-
 create_edit_box.addEventListener('mouseleave', (event) => {
     create_edit_box.classList.remove('active')
 })
@@ -96,7 +66,6 @@ tasktitle_input.addEventListener('keyup', (event) => {
         tasktitle_input.style.display = "none"
     }
 })
-
 
 
 goal_header_p.addEventListener('click', (event) => {
@@ -130,7 +99,8 @@ create_task_btn.addEventListener('click', (event) => {
         'description': description,
         'status': status, 
         'period': period, 
-        'notify': notify
+        'notify': notify,
+        'group_id': localStorage.getItem('recent_grp_id')
     })
     
     postData(CREATE_TASK_URL, taskbody)
@@ -153,7 +123,7 @@ edit_task_btn.addEventListener('click', (event) => {
         'description': description, 
         'status': status,
         'period': period, 
-        'notify': notify
+        'notify': notify,
     })
     
     postData(`${CREATE_TASK_URL}?task_id=${edit_task_btn.parentElement.parentElement.parentElement.id}`, taskbody)
@@ -165,3 +135,165 @@ edit_task_btn.addEventListener('click', (event) => {
 delete_task.addEventListener('click', (event) => {
     window.location.href = `${window.location.href}/delete_task/${delete_task.parentElement.parentElement.parentElement.id}`
 })
+
+const selected = document.querySelector('.selected')
+const dropdown = document.querySelector('.dropdown-menu')
+const select_p_tag = document.querySelector(".selected p:nth-child(1)")
+const caret = document.querySelector(".caret")
+const current_grp = document.querySelector(".current-grp")
+const grouplist = document.querySelectorAll('.groups-list li')
+
+const tasklist = document.querySelector('.tasklist')
+const all_task = document.querySelector('.all-task')
+
+
+current_grp.innerText = localStorage.getItem('recent_grp')
+select_p_tag.innerText = localStorage.getItem('recent_grp')
+
+selected.addEventListener('click', (event) => {
+    dropdown.classList.toggle('active')
+    caret.classList.toggle('active')
+})
+
+async function show_tasks() {
+    const response  = await fetch(`${window.location.href}/show_tasks/${localStorage.getItem('recent_grp_id')}`)
+    const data = await response.json()
+    
+    if (data.length == 0) {
+        tasklist.removeChild(all_task)
+    }
+
+    if (data.length == all_task.children.length) {
+        tasklist.appendChild(all_task)
+    }
+
+
+    if (all_task.children.length < data.length) {
+        for(let i = 0; i < data.length; i++) {
+            const div_task = document.createElement("div")
+            div_task.setAttribute('class', 'task')
+            div_task.setAttribute('id', data[i]['id'])
+            div_task.dataset.description = data[i]['description']
+            div_task.dataset.status = data[i]['status']
+            div_task.dataset.period = data[i]['period']
+            div_task.dataset.notify = data[i]['notify']
+
+
+            tasklist.appendChild(all_task)
+            all_task.appendChild(div_task)
+
+            const div_name = document.createElement("div")
+            div_name.setAttribute('class', 'name')
+            div_name.innerHTML = data[i]['title']
+
+            div_task.appendChild(div_name)
+
+            div_name.addEventListener('click', (event) => {
+                console.log("click")
+                const dataset = div_task.dataset
+                create_task_btn.style.display = "none"
+                edit_task_btn.style.display = "block"
+                delete_task.style.display = "block"
+
+                if (create_edit_box.classList.length == 2){ 
+                title_h1.innerText = div_name.innerHTML
+                create_edit_box.setAttribute('id', div_task.id)
+                desc.value = dataset.description
+                period.value = dataset.period
+                task_status.value = dataset.status
+                notify.value = dataset.notify
+                title_h1.innerText = task.innerHTML
+                }
+
+                else {
+                    create_edit_box.classList.toggle('active')
+                    create_edit_box.setAttribute('id', div_task.id)
+                    desc.value = dataset.description
+                    period.value = dataset.period
+                    task_status.value = dataset.status
+                    notify.value = dataset.notify
+                    title_h1.innerText = div_name.innerHTML
+                    task_title.appendChild(title_h1)
+                }
+            })
+        }
+    }
+
+}
+
+show_tasks()
+
+grouplist.forEach((li) => {
+    li.addEventListener('click', (event) => {
+        select_p_tag.innerHTML = li.innerText
+        current_grp.innerText = li.innerText
+        localStorage.setItem("recent_grp", current_grp.innerText)
+        localStorage.setItem("recent_grp_id", li.id)
+        dropdown.classList.toggle('active')
+        caret.classList.toggle('active')
+        show_tasks()
+        show_members()
+    })
+})
+
+
+const members_list = document.querySelector(".all-members ul")
+const all_members = document.querySelector('.all-members')
+
+async function show_members(){
+    const response = await fetch(`${window.location.href}/show_members/${localStorage.getItem('recent_grp_id')}`)
+    const data = response.json()
+
+    const members = data.then(member => {
+        if (member['groupusers'].length == 0) {
+            all_members.removeChild(members_list)
+        }
+
+        if (member['groupusers'].length == members_list.children.length) {
+            all_members.appendChild(members_list)
+        }
+
+        member['groupusers'].forEach((m) => {
+            if (members_list.children.length < member['groupusers'].length){
+            const member_li = document.createElement('li')
+            member_li.innerHTML = m 
+            members_list.appendChild(member_li)
+            }
+        })
+    })
+}
+
+show_members()
+
+const add_member = document.querySelector(".add-member")
+
+
+
+add_member.addEventListener("click", (event) => {
+    const member_input = document.createElement('input')
+    member_input.setAttribute("class", "add-member-input")
+    member_input.setAttribute('placeholder', 'Add New Member')
+
+    const li_elem = document.createElement("li")
+
+    all_members.appendChild(member_input)
+
+    member_input.addEventListener("keypress", async (event) => {
+
+        if(event.key === "Enter") {
+            const url = `${window.location.href}/add_member/${localStorage.getItem('recent_grp_id')}`
+            postData(url, body=JSON.stringify({'email': member_input.value}))
+            li_elem.innerHTML = member_input.value
+            members_list.appendChild(li_elem)
+        }
+    })
+})
+
+
+
+
+
+
+
+
+

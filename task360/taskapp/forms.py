@@ -6,7 +6,7 @@ from django.core.validators import validate_email, validate_slug
 from django.core.exceptions import ValidationError
 from django.contrib.auth.hashers import make_password, check_password
 
-from taskapp.models import TaskModel, UserModel
+from taskapp.models import TaskModel, UserModel, GroupModel
 
 # Custom Validators
 
@@ -16,6 +16,9 @@ class RegisterForm(forms.ModelForm):
     '''
     - Creates a Register Form
     '''
+    username = forms.CharField(max_length=100, widget=forms.TextInput(
+        attrs={'placeholder': 'Username'}
+    ), required=True) 
     email = forms.CharField(widget=forms.EmailInput(
         attrs={'placeholder': 'Email'}), required=True, validators=[validate_email])
     password = forms.CharField(widget=forms.PasswordInput(
@@ -23,7 +26,7 @@ class RegisterForm(forms.ModelForm):
 
     class Meta:
         model = UserModel
-        exclude = ['task']
+        exclude = ['none']
 
     def clean_password(self):
         data = self.cleaned_data['password']
@@ -83,4 +86,21 @@ class TaskForm(forms.ModelForm):
 
 
 class MFAForm(forms.Form):
+    '''
+    - MFA Form
+    '''
     code = forms.CharField(widget=forms.NumberInput, required=True)
+
+
+class GroupForm(forms.Form): 
+    '''
+    - Create Groups
+    '''
+
+    groupname = forms.CharField(widget=forms.TextInput(attrs={
+        'placeholder': 'Enter Group Name'
+}), required=True)
+
+
+
+    

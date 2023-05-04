@@ -10,7 +10,7 @@ from django.contrib.auth.hashers import make_password
 
 from authenticate.backend import AuthenticateUser
 
-from taskapp.models import UserModel, TaskModel
+from taskapp.models import UserModel, TaskModel, GroupModel
 from taskapp import forms
 from taskapp import tasks
 
@@ -189,8 +189,12 @@ def account(request):
     '''
     current_user = auth.get_user(request.session.get('user_email'))
     tasks = TaskModel.objects.filter(user=current_user)
+    groups = GroupModel.objects.filter(groupowner=current_user)
 
-    return render(request, 'taskapp/account.html', context={'tasks': tasks})
+
+    return render(request, 'taskapp/account.html', context={
+        'tasks': tasks, 'username': current_user.username, 'groups': groups, 
+        })
 
 
 @auth.is_authenticated(redirect_false='taskapp-login')
@@ -201,3 +205,30 @@ def delete_task(request, id):
     delete_task = TaskModel.objects.get(pk=id).delete()
 
     return redirect('taskapp-account')
+
+
+@auth.is_authenticated(redirect_false='taskapp-login')
+def create_group(request):
+    '''
+    - Allow users to create groups and add people to those groups
+    '''
+
+    form = forms.GroupForm()
+
+    if request.method == "POST": 
+        form = forms.GroupForm(request.POST)
+
+        current_user = auth.get_user(request.session.get('user_email'))
+
+        if form.is_valid():
+            grp = GroupModel.objects.create(
+                groupowner = current_user,
+                groupname=form.cleaned_data.get('groupname'),
+            )
+
+            grp.groupusers.add(current_user)
+                     
+        
+        return redirect('taskapp-account')
+    
+    return render(request, 'taskapp/creategroup.html', context={'form': form})
